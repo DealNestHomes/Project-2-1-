@@ -12,6 +12,9 @@ export default createApp({
     experimental: {
       asyncContext: true,
     },
+    externals: {
+      inline: ["h3", "h3-v2", "vinxi"],
+    },
   },
   routers: [
     {
