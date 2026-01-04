@@ -19,17 +19,17 @@ try {
   console.error("Failed to load .env", e);
 }
 
-import { minioClient } from "../minio";
+import { getMinioClient } from "../minio";
 
 async function setup() {
   // Set up Minio bucket for purchase agreements
   const bucketName = "purchase-agreements";
 
   try {
-    const bucketExists = await minioClient.bucketExists(bucketName);
+    const bucketExists = await getMinioClient().bucketExists(bucketName);
 
     if (!bucketExists) {
-      await minioClient.makeBucket(bucketName, "us-east-1");
+      await getMinioClient().makeBucket(bucketName, "us-east-1");
       console.log(`Created Minio bucket: ${bucketName}`);
 
       // Set bucket policy to allow public read access for files with "public/" prefix
@@ -45,7 +45,7 @@ async function setup() {
         ],
       };
 
-      await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
+      await getMinioClient().setBucketPolicy(bucketName, JSON.stringify(policy));
       console.log(`Set public read policy for ${bucketName}/public/*`);
     } else {
       console.log(`Minio bucket already exists: ${bucketName}`);
