@@ -1,6 +1,6 @@
 import { defineEventHandler, toWebRequest } from "@tanstack/react-start/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "./root";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 export default defineEventHandler(async (event) => {
 
@@ -17,6 +17,9 @@ export default defineEventHandler(async (event) => {
     // Check environment variables first
     const { validateEnv } = await import("~/server/env");
     validateEnv();
+
+    // Dynamically import the router to catch top-level errors (like Prisma DB init)
+    const { appRouter } = await import("./root");
 
     return await fetchRequestHandler({
       endpoint: "/api/trpc",
