@@ -1,7 +1,7 @@
-import { defineEventHandler, toWebRequest } from "@tanstack/react-start/server";
+import { eventHandler, toWebRequest } from "vinxi/http";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-export default defineEventHandler(async (event) => {
+export default eventHandler(async (event) => {
 
   const request = toWebRequest(event);
   if (!request) {
