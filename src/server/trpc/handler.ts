@@ -2,17 +2,16 @@ import { eventHandler, toWebRequest } from "vinxi/http";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 export default eventHandler(async (event) => {
-
-  const request = toWebRequest(event);
-  if (!request) {
-    return new Response("No request", { status: 400 });
-  }
-
-  const url = new URL(request.url);
-  console.log(`[tRPC Handler] Request: ${request.method} ${url.pathname}${url.search}`);
-  console.log(`[tRPC Handler] Headers:`, Object.fromEntries(request.headers.entries()));
-
   try {
+    const request = toWebRequest(event);
+    if (!request) {
+      return new Response("No request", { status: 400 });
+    }
+
+    const url = new URL(request.url);
+    console.log(`[tRPC Handler] Request: ${request.method} ${url.pathname}${url.search}`);
+    console.log(`[tRPC Handler] Headers:`, Object.fromEntries(request.headers.entries()));
+
     // Check environment variables first
     const { validateEnv } = await import("~/server/env");
     validateEnv();
@@ -40,7 +39,6 @@ export default eventHandler(async (event) => {
     console.error(`[tRPC Handler] CRITICAL HANDLER ERROR:`, err);
     console.error(`[tRPC Handler] Stack:`, err.stack);
 
-    // TEMPORARY: Return error details to client for debugging
     return new Response(JSON.stringify({
       error: "Internal Server Error",
       message: err.message,
