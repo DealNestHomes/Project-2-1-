@@ -14,6 +14,10 @@ export default defineEventHandler(async (event) => {
   console.log(`[tRPC Handler] Headers:`, Object.fromEntries(request.headers.entries()));
 
   try {
+    // Check environment variables first
+    const { validateEnv } = await import("~/server/env");
+    validateEnv();
+
     return await fetchRequestHandler({
       endpoint: "/api/trpc",
       req: request,

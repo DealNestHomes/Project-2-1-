@@ -19,12 +19,21 @@ const envSchema = z.object({
 
 const parsed = envSchema.safeParse(process.env);
 
+// We do NOT throw here anymore to prevent top-level crash on Vercel.
+// Instead, we export a check function.
 if (!parsed.success) {
   console.error(
     "❌ Invalid environment variables:",
     JSON.stringify(parsed.error.format(), null, 4),
   );
-  throw new Error("Invalid environment variables");
 }
 
-export const env = parsed.data;
+// If parsing fails, we cast process.env (or empty object) to specific type to satisfy TS,
+// but relying on validateEnv() to catch it at runtime.
+export const env = (parsed.success ? parsed.data : process.env) as unknown as z.infer<typeof envSchema>;
+
+export function validateEnv() {
+  if (!parsed.success) {
+    throw new Error(`Invalid environment variables: ${JSON.stringify(parsed.error.format())}`);
+  }
+}
