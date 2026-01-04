@@ -12,6 +12,9 @@ export default createApp({
     experimental: {
       asyncContext: true,
     },
+    externals: {
+      inline: ["@tanstack/start-server-core", "h3-v2", "h3"],
+    },
   },
   routers: [
     {
