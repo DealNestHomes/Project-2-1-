@@ -38,6 +38,7 @@ export default createApp({
         config("prisma-external-trpc", {
           ssr: {
             external: ["@prisma/client"],
+            noExternal: ["@tanstack/start-server-core", "h3-v2", "h3"],
           },
         }),
       ],
@@ -51,6 +52,11 @@ export default createApp({
       plugins: () => [
         tsConfigPaths({
           projects: ["./tsconfig.json"],
+        }),
+        config("force-inline-health", {
+          ssr: {
+            noExternal: ["@tanstack/start-server-core", "h3-v2", "h3"],
+          },
         }),
       ],
     },
@@ -67,6 +73,7 @@ export default createApp({
         config("prisma-external-debug", {
           ssr: {
             external: ["@prisma/client"],
+            noExternal: ["@tanstack/start-server-core", "h3-v2", "h3"],
           },
         }),
       ],
