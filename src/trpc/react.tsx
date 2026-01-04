@@ -10,7 +10,7 @@ import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { useState } from "react";
 import SuperJSON from "superjson";
 
-import { AppRouter } from "~/server/trpc/root";
+import type { AppRouter } from "~/server/trpc/root";
 import { getQueryClient } from "./query-client";
 
 // Now, with the newer @trpc/tanstack-react-query package, we no longer need createTRPCReact.

@@ -29,6 +29,11 @@ export default createApp({
         tsConfigPaths({
           projects: ["./tsconfig.json"],
         }),
+        config("prisma-external-trpc", {
+          ssr: {
+            external: ["@prisma/client"],
+          },
+        }),
       ],
     },
     {
@@ -40,6 +45,11 @@ export default createApp({
       plugins: () => [
         tsConfigPaths({
           projects: ["./tsconfig.json"],
+        }),
+        config("prisma-external-debug", {
+          ssr: {
+            external: ["@prisma/client"],
+          },
         }),
       ],
     },
@@ -59,11 +69,15 @@ export default createApp({
           generatedRouteTree: "./src/generated/routeTree.gen.ts",
         }),
         reactRefresh(),
-        nodePolyfills(),
         consoleForwardPlugin({
           enabled: true,
           endpoint: "/api/debug/client-logs",
           levels: ["log", "warn", "error", "info", "debug"],
+        }),
+        config("prisma-external-client", {
+          ssr: {
+            external: ["@prisma/client"],
+          },
         }),
       ],
     },
