@@ -22,12 +22,25 @@ export default defineEventHandler(async (event) => {
         return {};
       },
       onError({ error, path }) {
-        console.error(`tRPC error on '${path}':`, error);
+        console.error(`[tRPC Error] Path: '${path}'`);
+        console.error(`[tRPC Error] Message:`, error.message);
+        console.error(`[tRPC Error] Stack:`, error.stack);
+        if (error.cause) {
+           console.error(`[tRPC Error] Cause:`, error.cause);
+        }
       },
     });
-  } catch (err) {
-    console.error(`[tRPC Handler] CRITICAL ERROR:`, err);
-    return new Response(JSON.stringify({ error: "Internal Server Error", details: String(err) }), {
+  } catch (err: any) {
+    console.error(`[tRPC Handler] CRITICAL HANDLER ERROR:`, err);
+    console.error(`[tRPC Handler] Stack:`, err.stack);
+
+    // TEMPORARY: Return error details to client for debugging
+    return new Response(JSON.stringify({
+      error: "Internal Server Error",
+      message: err.message,
+      stack: err.stack,
+      details: String(err)
+    }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
