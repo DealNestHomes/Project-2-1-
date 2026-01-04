@@ -1,0 +1,6 @@
+{
+  "routeTreeFileHeader": [
+    "// noinspection JSUnusedGlobalSymbols"
+  ],
+  "generatedRouteTree": "./src/generated/routeTree.gen.ts"
+}

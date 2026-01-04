@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@postgres/app" // hardcoded because it's an internal docker connection
+}
+
+model DealSubmission {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  
+  // Contact Information
+  name        String
+  email       String
+  phone       String
+  
+  // Seller Information (for title company and transaction coordination)
+  sellerName      String  @default("")
+  sellerPhone     String  @default("")
+  sellerEmail     String  @default("")
+  
+  // Basic Property Information
+  propertyAddress     String
+  zipCode             String
+  propertyType        String
+  
+  // Property Specifications
+  bedrooms            Int?
+  baths               Int?
+  halfBaths           Int?
+  squareFootage       Int?
+  lotSize             Float?
+  lotSizeUnit         String?  // "acres" or "sqft"
+  yearBuilt           Int?
+  
+  // Deal Details
+  closingDate                 DateTime?
+  inspectionPeriodExpiration  DateTime?
+  occupancy                   String?
+  propertyCondition           String?
+  
+  // Repair & System Details
+  repairEstimateMin   String?
+  repairEstimateMax   String?
+  roofAge             String?
+  acType              String?
+  heatingSystemType   String?
+  heatingSystemAge    String?
+  foundationType      String?
+  foundationCondition String?
+  parkingType         String?
+  
+  // Financial Details
+  contractPrice       String
+  arv                 String  @default("") // After Repair Value
+  estimatedRepairs    String  @default("") // Estimated Repairs
+  
+  // Assignment Details (collected when deal moves to Assigned status)
+  assignmentProfit    String?
+  buyerName           String?
+  buyerPhone          String?
+  buyerEmail          String?
+  
+  // Additional Information
+  additionalInfo      String?
+  propertyAccess      String?
+  photoLink           String?
+  purchaseAgreementKey String?
+  jvAgreementKey      String?
+  assignmentAgreementKey String?
+  
+  // Status tracking
+  status              String   @default("new") // new, contacted, closed, etc.
+  staffNotes          String?  // Staff notes and communication history
+  
+  // TC tracking
+  sentToTcAt          DateTime?
+}
