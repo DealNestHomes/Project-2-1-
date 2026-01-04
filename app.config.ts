@@ -5,6 +5,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { config } from "vinxi/plugins/config";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { consoleForwardPlugin } from "./vite-console-forward-plugin";
+import { h3v2ResolverPlugin } from "./vite-h3-v2-plugin";
 
 export default createApp({
   server: {
@@ -32,6 +33,7 @@ export default createApp({
       handler: "./src/server/trpc/handler.ts",
       target: "server",
       plugins: () => [
+        h3v2ResolverPlugin(),
         tsConfigPaths({
           projects: ["./tsconfig.json"],
         }),
@@ -50,6 +52,7 @@ export default createApp({
       handler: "./src/server/health.ts",
       target: "server",
       plugins: () => [
+        h3v2ResolverPlugin(),
         tsConfigPaths({
           projects: ["./tsconfig.json"],
         }),
@@ -67,6 +70,7 @@ export default createApp({
       handler: "./src/server/debug/client-logs-handler.ts",
       target: "server",
       plugins: () => [
+        h3v2ResolverPlugin(),
         tsConfigPaths({
           projects: ["./tsconfig.json"],
         }),
