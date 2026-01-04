@@ -38,6 +38,18 @@ export default createApp({
     },
     {
       type: "http",
+      name: "health",
+      base: "/api/health",
+      handler: "./src/server/health.ts",
+      target: "server",
+      plugins: () => [
+        tsConfigPaths({
+          projects: ["./tsconfig.json"],
+        }),
+      ],
+    },
+    {
+      type: "http",
       name: "debug",
       base: "/api/debug/client-logs",
       handler: "./src/server/debug/client-logs-handler.ts",
