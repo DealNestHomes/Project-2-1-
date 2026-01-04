@@ -12,6 +12,9 @@ export default createApp({
     experimental: {
       asyncContext: true,
     },
+    alias: {
+      "h3-v2": "h3",
+    },
   },
   routers: [
     {
