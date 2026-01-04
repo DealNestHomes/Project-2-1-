@@ -1,6 +1,5 @@
 import { defineEventHandler, toWebRequest } from "@tanstack/react-start/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 export default defineEventHandler(async (event) => {
 
