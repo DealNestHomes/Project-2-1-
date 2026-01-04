@@ -12,6 +12,9 @@ export default createApp({
     experimental: {
       asyncContext: true,
     },
+    alias: {
+      "h3-v2": "./src/vendor/h3-v2",
+    },
     externals: {
       inline: ["@tanstack/start-server-core", "h3-v2", "h3"],
     },

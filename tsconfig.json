@@ -20,7 +20,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "h3-v2": ["./src/vendor/h3-v2"]
     },
     "noEmit": true
   }
