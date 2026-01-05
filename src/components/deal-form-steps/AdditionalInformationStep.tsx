@@ -21,25 +21,25 @@ export function AdditionalInformationStep({
 }: AdditionalInformationStepProps) {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  
+
   const trpc = useTRPC();
   const generatePresignedUrlMutation = useMutation(
     trpc.generatePresignedUploadUrl.mutationOptions()
   );
-  
+
   const purchaseAgreementKey = watch("purchaseAgreementKey");
-  
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
+
     // Validate file type (PDF only)
     if (file.type !== "application/pdf") {
       toast.error("Please upload a PDF file");
       event.target.value = ""; // Reset input
       return;
     }
-    
+
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -47,15 +47,15 @@ export function AdditionalInformationStep({
       event.target.value = ""; // Reset input
       return;
     }
-    
+
     setUploadingFile(true);
-    
+
     try {
       // Get presigned URL from backend
       const { presignedUrl, objectKey } = await generatePresignedUrlMutation.mutateAsync({
         filename: file.name,
       });
-      
+
       // Upload file to Minio using presigned URL
       const uploadResponse = await fetch(presignedUrl, {
         method: "PUT",
@@ -64,24 +64,30 @@ export function AdditionalInformationStep({
           "Content-Type": file.type,
         },
       });
-      
+
       if (!uploadResponse.ok) {
         throw new Error("Failed to upload file");
       }
-      
+
       // Store the object key in form state
       setValue("purchaseAgreementKey", objectKey);
       setUploadedFileName(file.name);
       toast.success("Purchase agreement uploaded successfully");
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload file. Please try again.");
+      // Graceful degradation - show warning but don't block submission
+      toast.error("File upload unavailable. You can proceed without uploading - just include the purchase agreement link in 'Additional Information' or email it separately.", {
+        duration: 6000,
+      });
+      // Clear the file selection so users know it didn't upload
+      setValue("purchaseAgreementKey", undefined);
+      setUploadedFileName(null);
     } finally {
       setUploadingFile(false);
       event.target.value = ""; // Reset input to allow re-uploading same file
     }
   };
-  
+
   const handleRemoveFile = () => {
     setValue("purchaseAgreementKey", undefined);
     setUploadedFileName(null);
@@ -182,7 +188,7 @@ export function AdditionalInformationStep({
           >
             Purchase Agreement (Optional)
           </label>
-          
+
           {!purchaseAgreementKey ? (
             <div className="relative">
               <input
@@ -237,10 +243,10 @@ export function AdditionalInformationStep({
               </button>
             </div>
           )}
-          
+
           <p className="mt-2 text-xs text-gray-600 flex items-start gap-1.5">
             <span className="text-primary-600 font-bold mt-0.5">→</span>
-            <span>Upload a PDF copy of the purchase agreement (optional, max 10MB)</span>
+            <span>Upload a PDF copy (optional, max 10MB). If upload fails, you can email the agreement separately or include a link in the field above.</span>
           </p>
         </div>
 
