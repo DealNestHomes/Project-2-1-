@@ -1,4 +1,4 @@
-import { defineEventHandler, toWebRequest } from "@tanstack/react-start/server";
+import { eventHandler, toWebRequest } from "vinxi/http";
 
 interface LogEntry {
   level: string;
@@ -14,7 +14,7 @@ interface ClientLogRequest {
   logs: LogEntry[];
 }
 
-export default defineEventHandler(async (event) => {
+export default eventHandler(async (event) => {
   const request = toWebRequest(event);
   if (!request || request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
