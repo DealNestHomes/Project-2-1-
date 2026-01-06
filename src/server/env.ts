@@ -15,6 +15,10 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number(),
   SMTP_USER: z.string(),
   SMTP_PASS: z.string(),
+
+  // Supabase Storage
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string(),
 });
 
 const parsed = envSchema.safeParse(process.env);

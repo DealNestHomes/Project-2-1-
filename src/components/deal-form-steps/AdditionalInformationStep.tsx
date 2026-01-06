@@ -75,13 +75,7 @@ export function AdditionalInformationStep({
       toast.success("Purchase agreement uploaded successfully");
     } catch (error) {
       console.error("Error uploading file:", error);
-      // Graceful degradation - show warning but don't block submission
-      toast.error("File upload unavailable. You can proceed without uploading - just include the purchase agreement link in 'Additional Information' or email it separately.", {
-        duration: 6000,
-      });
-      // Clear the file selection so users know it didn't upload
-      setValue("purchaseAgreementKey", undefined);
-      setUploadedFileName(null);
+      toast.error("Failed to upload file. Please try again.");
     } finally {
       setUploadingFile(false);
       event.target.value = ""; // Reset input to allow re-uploading same file

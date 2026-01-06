@@ -14,7 +14,7 @@ export const getPlaceDetails = baseProcedure
       url.searchParams.append("fields", "address_components,formatted_address");
 
       const response = await fetch(url.toString());
-      
+
       if (!response.ok) {
         throw new Error(`Places Details API returned status ${response.status}`);
       }
@@ -54,7 +54,9 @@ export const getPlaceDetails = baseProcedure
         }
       }
 
-      const streetAddress = `${streetNumber} ${route}`.trim();
+      const formattedAddress = data.result.formatted_address || "";
+      // Strip ", USA" from the end if present for a cleaner look
+      const streetAddress = formattedAddress.replace(/, USA$/, "");
 
       return {
         streetAddress,

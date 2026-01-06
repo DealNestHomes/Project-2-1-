@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTRPC, useTRPCClient } from "~/trpc/react";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Loader2 } from "lucide-react";
@@ -52,19 +52,21 @@ export function AddressAutocomplete({
     ...trpc.getAddressSuggestions.queryOptions({
       input: debouncedInput,
     }),
-    enabled: debouncedInput.length > 3,
+    enabled: debouncedInput.length >= 3,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-  const suggestions = suggestionsData?.suggestions || [];
+  const suggestions = useMemo(() => suggestionsData?.suggestions || [], [suggestionsData]);
 
   // Show dropdown when we have suggestions
   useEffect(() => {
-    console.log('[AddressAutocomplete] suggestions:', suggestions, 'value:', value, 'value.length:', value.length);
-    const shouldOpen = suggestions.length > 0 && value.length > 3;
-    console.log('[AddressAutocomplete] shouldOpen:', shouldOpen);
-    setIsOpen(shouldOpen);
+    const shouldOpen = suggestions.length > 0 && value.length >= 3;
+    if (shouldOpen !== isOpen) {
+      setIsOpen(shouldOpen);
+    }
+    // Only reset index if the suggestions list actually changed
     setSelectedIndex(-1);
-  }, [suggestions, value]);
+  }, [suggestions, value.length > 3]); // Optimized dependency
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -179,10 +181,10 @@ export function AddressAutocomplete({
               >
                 <MapPin className="h-5 w-5 text-primary-600 mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-900 truncate text-base">
+                  <div className="font-semibold text-gray-900 text-base leading-tight">
                     {suggestion.mainText}
                   </div>
-                  <div className="text-sm text-gray-600 truncate mt-0.5">
+                  <div className="text-sm text-gray-600 mt-1 leading-snug">
                     {suggestion.secondaryText}
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { baseProcedure } from "~/server/trpc/main";
-import { getMinioClient } from "~/server/minio";
+import { getSupabaseClient } from "~/server/supabase";
 
 export const generatePresignedUploadUrl = baseProcedure
   .input(
@@ -10,21 +10,24 @@ export const generatePresignedUploadUrl = baseProcedure
   )
   .mutation(async ({ input }) => {
     const bucketName = "purchase-agreements";
+    const supabase = getSupabaseClient();
 
     // Generate a unique object key with timestamp to avoid collisions
     const timestamp = Date.now();
     const sanitizedFilename = input.filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const objectKey = `public/${timestamp}-${sanitizedFilename}`;
+    const objectKey = `${timestamp}-${sanitizedFilename}`;
 
-    // Generate presigned URL valid for 15 minutes
-    const presignedUrl = await getMinioClient().presignedPutObject(
-      bucketName,
-      objectKey,
-      15 * 60 // 15 minutes in seconds
-    );
+    // Generate signed upload URL (valid for 60 minutes)
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUploadUrl(objectKey);
+
+    if (error || !data) {
+      throw new Error(`Failed to generate upload URL: ${error?.message || 'Unknown error'}`);
+    }
 
     return {
-      presignedUrl,
-      objectKey,
+      presignedUrl: data.signedUrl,
+      objectKey: data.path,
     };
   });

@@ -26,11 +26,8 @@ export const getAddressSuggestions = baseProcedure
 
       const data = await response.json();
 
-      console.log('[getAddressSuggestions] Google API response:', JSON.stringify(data, null, 2));
-
       // Check if we got results
       if (data.status !== "OK" || !data.predictions || data.predictions.length === 0) {
-        console.log('[getAddressSuggestions] No predictions - status:', data.status, 'error_message:', data.error_message);
         return { suggestions: [] };
       }
 
