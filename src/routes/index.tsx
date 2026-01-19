@@ -298,7 +298,7 @@ function Home() {
               </div>
               <Quote className="h-10 w-10 text-primary-200 mb-4" />
               <p className="text-gray-700 mb-6 leading-relaxed italic">
-                "DealNest helped me move a tough wholesale deal in Phoenix in just 9 days. Their buyer network is incredible, and the team kept me updated every step of the way. Highly recommend!"
+                "DealNest helped me move a tough wholesale deal in Detroit in just 9 days. They even got photos of the property for me and kept me updated every step of the way. Highly recommend."
               </p>
               <div className="flex items-center gap-4 pt-4 border-t-2 border-gray-100">
                 <img
