@@ -302,13 +302,13 @@ function Home() {
               </p>
               <div className="flex items-center gap-4 pt-4 border-t-2 border-gray-100">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+                  src="/austin-profile.png"
                   alt="Austin"
                   className="w-14 h-14 rounded-full object-cover ring-2 ring-primary-200"
                 />
                 <div>
                   <div className="font-bold text-gray-900">Austin</div>
-                  <div className="text-sm text-gray-600">Phoenix, AZ</div>
+                  <div className="text-sm text-gray-600">Detroit, MI</div>
                   <div className="text-xs text-primary-600 font-semibold mt-1 bg-primary-50 px-2 py-1 rounded-full inline-block">
                     $45K • 9 Days
                   </div>
