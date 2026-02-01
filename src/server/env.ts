@@ -21,7 +21,6 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
 
   // Zapier Webhooks
-  ZAPIER_INVESTORLIFT_WEBHOOK_URL: z.string().url(),
   JV_AGREEMENT_WEBHOOK_URL: z.string().url(),
   DEAL_DESCRIPTION_WEBHOOK_URL: z.string().url(),
 });
