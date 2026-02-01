@@ -31,6 +31,12 @@ export const sendDealDescription = baseProcedure
     // Forward to Zapier
     await sendDealDescriptionToZapier(deal);
 
+    // Update the database to record when the description was sent
+    await db.dealSubmission.update({
+      where: { id: input.dealId },
+      data: { sentDealDescriptionAt: new Date() },
+    });
+
     return {
       success: true,
       message: "Deal description sent successfully",
