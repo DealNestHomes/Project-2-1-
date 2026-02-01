@@ -44,6 +44,10 @@ export const sendDealToTc = baseProcedure
       buyerName: deal.buyerName ?? undefined,
       buyerPhone: deal.buyerPhone ?? undefined,
       buyerEmail: deal.buyerEmail ?? undefined,
+      // Deal Requirements
+      photosNeeded: deal.photosNeeded,
+      lockboxNeeded: deal.lockboxNeeded,
+      photographyLink: deal.photoLink ?? undefined,
     };
 
     // Determine the recipient email (use override if provided, otherwise use default)

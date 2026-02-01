@@ -16,7 +16,7 @@ export const submitDeal = baseProcedure
           (val) => val.length === 10,
           "Phone number must be exactly 10 digits"
         ),
-      
+
       // Seller Information - STRICTLY REQUIRED (no Unknown allowed)
       sellerName: z.string().min(1, "Seller name is required"),
       sellerEmail: z.string().email("Valid seller email is required"),
@@ -27,7 +27,7 @@ export const submitDeal = baseProcedure
           (val) => val.length === 10,
           "Phone number must be exactly 10 digits"
         ),
-      
+
       // Basic Property Information
       propertyAddress: z.string().min(1, "Property address is required"),
       zipCode: z.string().min(1, "ZIP code is required"),
@@ -35,7 +35,7 @@ export const submitDeal = baseProcedure
         z.string().min(1, "Property type is required"),
         z.literal("Unknown"),
       ]),
-      
+
       // Property Specifications - MANDATORY but allow Unknown
       bedrooms: z.union([z.number().int().min(0), z.literal("Unknown")]),
       baths: z.union([z.number().int().min(0), z.literal("Unknown")]),
@@ -44,7 +44,7 @@ export const submitDeal = baseProcedure
       lotSize: z.union([z.number().min(0), z.literal("Unknown")]),
       lotSizeUnit: z.union([z.string().min(1), z.literal("Unknown")]),
       yearBuilt: z.union([z.number().int().min(1800).max(new Date().getFullYear() + 1), z.literal("Unknown")]),
-      
+
       // Deal Details - MANDATORY but allow Unknown for descriptive fields
       closingDate: z.string().min(1, "Closing date is required").date("Closing date must be a valid date"),
       inspectionPeriodExpiration: z.union([z.string().date(), z.literal("Unknown")]),
@@ -53,7 +53,7 @@ export const submitDeal = baseProcedure
         z.enum(["Full Rehab", "Major Repairs", "Light Rehab", "Turnkey"]),
         z.literal("Unknown"),
       ]),
-      
+
       // Repair & System Details - MANDATORY but allow Unknown
       repairEstimateMin: z.union([z.string().min(1), z.literal("Unknown")]),
       repairEstimateMax: z.union([z.string().min(1), z.literal("Unknown")]),
@@ -73,16 +73,18 @@ export const submitDeal = baseProcedure
         z.enum(["Attached Garage", "Detached Garage", "Driveway", "Carport", "Street", "Unassigned"]),
         z.literal("Unknown"),
       ]),
-      
+
       // Financial Details - REQUIRED fields
       arv: z.string().min(1, "ARV is required").regex(/^[\d,\.]+$/, "ARV must contain only numbers"),
       estimatedRepairs: z.string().min(1, "Estimated repairs is required").regex(/^[\d,\.]+$/, "Estimated repairs must contain only numbers"),
       contractPrice: z.string().min(1, "Contract price is required").regex(/^[\d,\.]+$/, "Contract price must contain only numbers"),
-      
+
       // Additional Information - MANDATORY but allow Unknown
       additionalInfo: z.union([z.string().min(1), z.literal("Unknown")]),
       propertyAccess: z.union([z.string().min(1), z.literal("Unknown")]),
       photoLink: z.union([z.string().min(1), z.literal("Unknown"), z.literal("")]),
+      photosNeeded: z.boolean(),
+      lockboxNeeded: z.boolean(),
       purchaseAgreementKey: z.string().optional(),
     })
   )
@@ -113,17 +115,17 @@ export const submitDeal = baseProcedure
         name: input.name,
         email: input.email,
         phone: input.phone,
-        
+
         // Seller Information
         sellerName: input.sellerName,
         sellerEmail: input.sellerEmail,
         sellerPhone: input.sellerPhone,
-        
+
         // Basic Property Information
         propertyAddress: input.propertyAddress,
         zipCode: input.zipCode,
         propertyType: unknownToUndefined(input.propertyType) || "Unknown",
-        
+
         // Property Specifications
         bedrooms: unknownToUndefined(input.bedrooms),
         baths: unknownToUndefined(input.baths),
@@ -132,13 +134,13 @@ export const submitDeal = baseProcedure
         lotSize: unknownToUndefined(input.lotSize),
         lotSizeUnit: unknownToUndefined(input.lotSizeUnit),
         yearBuilt: unknownToUndefined(input.yearBuilt),
-        
+
         // Deal Details
         closingDate: parseUTCDate(input.closingDate),
         inspectionPeriodExpiration: unknownDateToUndefined(input.inspectionPeriodExpiration),
         occupancy: unknownToUndefined(input.occupancy),
         propertyCondition: unknownToUndefined(input.propertyCondition),
-        
+
         // Repair & System Details
         repairEstimateMin: unknownToUndefined(input.repairEstimateMin),
         repairEstimateMax: unknownToUndefined(input.repairEstimateMax),
@@ -149,18 +151,20 @@ export const submitDeal = baseProcedure
         foundationType: unknownToUndefined(input.foundationType),
         foundationCondition: unknownToUndefined(input.foundationCondition),
         parkingType: unknownToUndefined(input.parkingType),
-        
+
         // Financial Details
         arv: input.arv,
         estimatedRepairs: input.estimatedRepairs,
         contractPrice: input.contractPrice,
-        
+
         // Additional Information
         additionalInfo: unknownToUndefined(input.additionalInfo),
         propertyAccess: unknownToUndefined(input.propertyAccess),
         photoLink: unknownToUndefined(input.photoLink),
+        photosNeeded: input.photosNeeded,
+        lockboxNeeded: input.lockboxNeeded,
         purchaseAgreementKey: input.purchaseAgreementKey,
-        
+
         status: "new",
       },
     });

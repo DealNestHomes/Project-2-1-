@@ -175,6 +175,60 @@ export function AdditionalInformationStep({
           </p>
         </div>
 
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="bg-gray-50/50 p-4 rounded-xl border-2 border-gray-100 hover:border-primary-200 transition-all">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center mt-1">
+                <input
+                  type="checkbox"
+                  {...register("photosNeeded", { required: "This field is required" })}
+                  className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+                />
+              </div>
+              <div>
+                <span className="block text-sm font-bold text-gray-800 group-hover:text-primary-700 transition-colors">
+                  Photos needed? <span className="text-red-500">*</span>
+                </span>
+                <span className="text-xs text-gray-500 leading-tight block mt-0.5">
+                  Check if you need professional photos for this property
+                </span>
+              </div>
+            </label>
+            {errors.photosNeeded && (
+              <p className="mt-2 text-xs text-red-600 font-medium flex items-center gap-1">
+                <span className="w-1 h-1 bg-red-600 rounded-full" />
+                {errors.photosNeeded.message as string}
+              </p>
+            )}
+          </div>
+
+          <div className="bg-gray-50/50 p-4 rounded-xl border-2 border-gray-100 hover:border-primary-200 transition-all">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center mt-1">
+                <input
+                  type="checkbox"
+                  {...register("lockboxNeeded", { required: "This field is required" })}
+                  className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+                />
+              </div>
+              <div>
+                <span className="block text-sm font-bold text-gray-800 group-hover:text-primary-700 transition-colors">
+                  Lockbox needed? <span className="text-red-500">*</span>
+                </span>
+                <span className="text-xs text-gray-500 leading-tight block mt-0.5">
+                  Check if a lockbox needs to be placed at the property
+                </span>
+              </div>
+            </label>
+            {errors.lockboxNeeded && (
+              <p className="mt-2 text-xs text-red-600 font-medium flex items-center gap-1">
+                <span className="w-1 h-1 bg-red-600 rounded-full" />
+                {errors.lockboxNeeded.message as string}
+              </p>
+            )}
+          </div>
+        </div>
+
         <div>
           <label
             htmlFor="purchaseAgreement"

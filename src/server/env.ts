@@ -19,6 +19,11 @@ const envSchema = z.object({
   // Supabase Storage
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
+
+  // Zapier Webhooks
+  ZAPIER_INVESTORLIFT_WEBHOOK_URL: z.string().url(),
+  JV_AGREEMENT_WEBHOOK_URL: z.string().url(),
+  DEAL_DESCRIPTION_WEBHOOK_URL: z.string().url(),
 });
 
 const parsed = envSchema.safeParse(process.env);

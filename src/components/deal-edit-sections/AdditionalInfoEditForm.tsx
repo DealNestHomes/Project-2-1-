@@ -10,6 +10,8 @@ interface AdditionalInfoEditFormProps {
   initialData: {
     additionalInfo: string | null;
     photoLink: string | null;
+    photosNeeded: boolean;
+    lockboxNeeded: boolean;
   };
   onCancel: () => void;
   onSuccess: () => void;
@@ -50,10 +52,14 @@ export function AdditionalInfoEditForm({
   } = useForm<{
     additionalInfo: string;
     photoLink: string;
+    photosNeeded: boolean;
+    lockboxNeeded: boolean;
   }>({
     defaultValues: {
       additionalInfo: initialData.additionalInfo || "",
       photoLink: initialData.photoLink || "",
+      photosNeeded: initialData.photosNeeded,
+      lockboxNeeded: initialData.lockboxNeeded,
     },
   });
 
@@ -63,6 +69,8 @@ export function AdditionalInfoEditForm({
       dealId,
       additionalInfo: data.additionalInfo || null,
       photoLink: data.photoLink || null,
+      photosNeeded: data.photosNeeded,
+      lockboxNeeded: data.lockboxNeeded,
     });
   };
 
@@ -103,6 +111,31 @@ export function AdditionalInfoEditForm({
             placeholder="https://drive.google.com/..."
             className="w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-100 text-black transition-all hover:border-gray-300 hover:shadow-md px-4 py-3 text-base min-h-[52px]"
           />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-100 flex items-center gap-3">
+            <input
+              id="photosNeeded"
+              type="checkbox"
+              {...register("photosNeeded")}
+              className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+            />
+            <label htmlFor="photosNeeded" className="text-sm font-bold text-gray-800 cursor-pointer">
+              Photos Needed?
+            </label>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-xl border-2 border-gray-100 flex items-center gap-3">
+            <input
+              id="lockboxNeeded"
+              type="checkbox"
+              {...register("lockboxNeeded")}
+              className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+            />
+            <label htmlFor="lockboxNeeded" className="text-sm font-bold text-gray-800 cursor-pointer">
+              Lockbox Needed?
+            </label>
+          </div>
         </div>
       </div>
 

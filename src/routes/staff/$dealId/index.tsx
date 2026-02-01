@@ -54,6 +54,10 @@ function DealDetailPage() {
   const [isEditingAssignment, setIsEditingAssignment] = useState(false);
   const [isTcModalOpen, setIsTcModalOpen] = useState(false);
   const [tcEmailInput, setTcEmailInput] = useState("contract2closings@gmail.com");
+  const [isJvModalOpen, setIsJvModalOpen] = useState(false);
+  const [jvNameInput, setJvNameInput] = useState("");
+  const [jvEmailInput, setJvEmailInput] = useState("");
+  const [jvLlcNameInput, setJvLlcNameInput] = useState("Tungsten Capital LLC");
 
   const dealQuery = useQuery(
     trpc.getDealSubmission.queryOptions({
@@ -98,6 +102,53 @@ function DealDetailPage() {
       },
     }),
   );
+
+  const sendJvAgreementMutation = useMutation(
+    trpc.sendJvAgreement.mutationOptions({
+      onSuccess: () => {
+      toast.success("JV Agreement request sent!");
+      dealQuery.refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  }));
+
+  const sendDealDescriptionMutation = useMutation(
+    trpc.sendDealDescription.mutationOptions({
+      onSuccess: () => {
+      toast.success("Deal details sent for description!");
+        // Manually update the cache to show the indicator immediately (optimistic UI)
+        const currentDeal = queryClient.getQueryData(trpc.getDealSubmission.queryKey({ authToken: token!, dealId: parseInt(dealId) }));
+        if (currentDeal) {
+          queryClient.setQueryData(
+            trpc.getDealSubmission.queryKey({ authToken: token!, dealId: parseInt(dealId) }),
+            { ...(currentDeal as any), sentDealDescriptionAt: new Date().toISOString() }
+          );
+        }
+
+        // Also update the list query cache so the badge appears on the Kanban board
+        queryClient.setQueryData(
+          trpc.listDealSubmissions.queryKey({ authToken: token!, limit: 100 }),
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              deals: oldData.deals.map((d: any) =>
+                d.id === parseInt(dealId)
+                  ? { ...d, sentDealDescriptionAt: new Date().toISOString() }
+                  : d
+              ),
+            };
+          }
+        );
+      },
+      onError: (error) => {
+        toast.error(`Error: ${error.message}`);
+      },
+    }),
+  );
+
 
   const {
     register,
@@ -150,6 +201,23 @@ function DealDetailPage() {
       authToken: token!,
       dealId: parseInt(dealId),
       tcEmailOverride: tcEmailInput !== "contract2closings@gmail.com" ? tcEmailInput : undefined,
+    });
+  };
+
+  const handleSendJvAgreement = () => {
+    sendJvAgreementMutation.mutate({
+      authToken: token!,
+      dealId: parseInt(dealId),
+      recipientName: jvNameInput,
+      recipientEmail: jvEmailInput,
+      llcName: jvLlcNameInput,
+    });
+  };
+
+  const handleSendDescription = () => {
+    sendDealDescriptionMutation.mutate({
+      authToken: token!,
+      dealId: parseInt(dealId),
     });
   };
 
@@ -219,6 +287,26 @@ function DealDetailPage() {
     return colors[status] || "bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border-2 border-gray-200";
   };
 
+  const StatusIndicator = ({
+    icon: Icon,
+    label,
+    date,
+    colorClass,
+    borderColorClass,
+    textColorClass,
+    iconColorClass
+  }: any) => (
+    <div className={`flex items-center gap-2 bg-gradient-to-r ${colorClass} border-2 ${borderColorClass} px-3 py-1.5 rounded-lg shadow-sm`}>
+      <Icon className={`w-3.5 h-3.5 ${iconColorClass} flex-shrink-0`} />
+      <div className="flex flex-col">
+        <span className={`text-[10px] font-bold ${textColorClass} uppercase tracking-wider leading-tight`}>{label}</span>
+        <span className={`text-[10px] ${textColorClass} font-medium leading-tight opacity-90`}>
+          {new Date(date).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -230,23 +318,66 @@ function DealDetailPage() {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="font-medium">Back to Dashboard</span>
         </button>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 truncate">{deal.name}</h1>
-            <p className="text-gray-600 text-sm md:text-base">Deal #{deal.id}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {deal.sentToTcAt && (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 px-3 md:px-4 py-2 md:py-2.5 rounded-xl shadow-sm">
-                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0" />
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold text-green-800 uppercase tracking-wide">Sent to TC</span>
-                  <span className="text-xs text-green-700 font-medium">
-                    {new Date(deal.sentToTcAt).toLocaleDateString()} at {new Date(deal.sentToTcAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 truncate">{deal.name}</h1>
+              <p className="text-gray-600 text-sm md:text-base mb-3">Deal #{deal.id}</p>
+
+              {/* Status Indicators Row */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {(deal as any).sentToTcAt && (
+                  <StatusIndicator
+                    icon={CheckCircle2}
+                    label="Sent to TC"
+                    date={(deal as any).sentToTcAt}
+                    colorClass="from-green-50 to-emerald-50"
+                    borderColorClass="border-green-200"
+                    textColorClass="text-green-800"
+                    iconColorClass="text-green-600"
+                  />
+                )}
+                {(deal as any).sentJvAgreementAt && (
+                  <StatusIndicator
+                    icon={CheckCircle2}
+                    label="JV Sent"
+                    date={(deal as any).sentJvAgreementAt}
+                    colorClass="from-blue-50 to-indigo-50"
+                    borderColorClass="border-blue-200"
+                    textColorClass="text-blue-800"
+                    iconColorClass="text-blue-600"
+                  />
+                )}
+                {(deal as any).sentDealDescriptionAt && (
+                  <StatusIndicator
+                    icon={CheckCircle2}
+                    label="Desc Sent"
+                    date={(deal as any).sentDealDescriptionAt}
+                    colorClass="from-purple-50 to-fuchsia-50"
+                    borderColorClass="border-purple-200"
+                    textColorClass="text-purple-800"
+                    iconColorClass="text-purple-600"
+                  />
+                )}
               </div>
-            )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+            <button
+               onClick={() => {
+                 setJvNameInput(deal.name);
+                 setJvEmailInput(deal.email);
+                 setIsJvModalOpen(true);
+               }}
+               disabled={sendJvAgreementMutation.isPending}
+               className="group relative bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 md:px-5 py-2 md:py-3 rounded-xl font-bold hover:from-primary-700 hover:to-primary-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden flex items-center gap-2 min-h-[44px] whitespace-nowrap"
+             >
+               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+               <span className="relative flex items-center gap-2">
+                 <FileText className="w-4 h-4 md:w-5 md:h-5" />
+                 <span className="hidden sm:inline">Send JV Agreement</span>
+                 <span className="sm:hidden">JV</span>
+               </span>
+             </button>
             <button
               onClick={() => {
                 setTcEmailInput("contract2closings@gmail.com");
@@ -260,6 +391,22 @@ function DealDetailPage() {
                 <Send className="w-4 h-4 md:w-5 md:h-5" />
                 <span className="hidden sm:inline">{deal.sentToTcAt ? 'Resend to TC' : 'Send to TC'}</span>
                 <span className="sm:hidden">TC</span>
+              </span>
+            </button>
+            <button
+              onClick={handleSendDescription}
+              disabled={sendDealDescriptionMutation.isPending}
+              className="group relative bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 md:px-5 py-2 md:py-3 rounded-xl font-bold hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden flex items-center gap-2 min-h-[44px] whitespace-nowrap"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <span className="relative flex items-center gap-2">
+                {sendDealDescriptionMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                ) : (
+                  <FileText className="w-4 h-4 md:w-5 md:h-5" />
+                )}
+                <span className="hidden sm:inline">Description</span>
+                <span className="sm:hidden">Desc</span>
               </span>
             </button>
             <span
@@ -295,7 +442,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingContact ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -376,7 +523,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingSeller ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -681,7 +828,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingProperty ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -794,7 +941,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingDealDetails ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-xl border-2 border-green-200 shadow-sm">
@@ -904,7 +1051,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingRepairSystems ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -1008,7 +1155,7 @@ function DealDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {!isEditingAdditionalInfo ? (
               <div className="space-y-3">
                 <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -1138,7 +1285,7 @@ function DealDetailPage() {
               >
                 {/* Shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                
+
                 {/* Button content */}
                 <span className="relative flex items-center justify-center gap-2">
                   {updateMutation.isPending ? (
@@ -1171,7 +1318,7 @@ function DealDetailPage() {
                 Send to Transaction Coordinator
               </h2>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label htmlFor="tcEmail" className="block text-sm font-bold text-gray-800 mb-2.5 flex items-center gap-2">
@@ -1210,6 +1357,101 @@ function DealDetailPage() {
                   className="flex-1 bg-gradient-to-r from-accent-600 to-accent-700 text-white px-4 py-3 rounded-xl font-bold hover:from-accent-700 hover:to-accent-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   {sendToTcMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>Send Now</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* JV Email Modal */}
+      {isJvModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-in fade-in zoom-in-95 duration-300">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-primary-200">
+              <div className="bg-gradient-to-br from-primary-600 to-primary-700 p-2.5 md:p-3 rounded-xl shadow-md">
+                <FileText className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                Send JV Agreement
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="jvName" className="block text-sm font-bold text-gray-800 mb-2.5 flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary-600" />
+                  Recipient Name
+                </label>
+                <input
+                  id="jvName"
+                  type="text"
+                  value={jvNameInput}
+                  onChange={(e) => setJvNameInput(e.target.value)}
+                  className="w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-100 text-black transition-all hover:border-gray-300 hover:shadow-md px-4 py-3 text-base min-h-[52px]"
+                  placeholder="Recipient Name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="jvEmail" className="block text-sm font-bold text-gray-800 mb-2.5 flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-primary-600" />
+                  Recipient Email Address
+                </label>
+                <input
+                  id="jvEmail"
+                  type="email"
+                  value={jvEmailInput}
+                  onChange={(e) => setJvEmailInput(e.target.value)}
+                  className="w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-100 text-black transition-all hover:border-gray-300 hover:shadow-md px-4 py-3 text-base min-h-[52px]"
+                  placeholder="recipient@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="jvLlcName" className="block text-sm font-bold text-gray-800 mb-2.5 flex items-center gap-2">
+                  <Home className="h-4 w-4 text-primary-600" />
+                  LLC Name
+                </label>
+                <input
+                  id="jvLlcName"
+                  type="text"
+                  value={jvLlcNameInput}
+                  onChange={(e) => setJvLlcNameInput(e.target.value)}
+                  className="w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-100 text-black transition-all hover:border-gray-300 hover:shadow-md px-4 py-3 text-base min-h-[52px]"
+                  placeholder="LLC Name"
+                />
+              </div>
+
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <p className="text-sm text-blue-800 font-medium leading-relaxed">
+                  This will send the JV Agreement documentation request to the recipient and record the action in Zapier.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  onClick={() => setIsJvModalOpen(false)}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all border-2 border-gray-200 hover:border-gray-300 min-h-[48px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendJvAgreement}
+                  disabled={sendJvAgreementMutation.isPending || !jvEmailInput || !jvNameInput}
+                  className="flex-1 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 py-3 rounded-xl font-bold hover:from-primary-700 hover:to-primary-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
+                >
+                  {sendJvAgreementMutation.isPending ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
                       <span>Sending...</span>

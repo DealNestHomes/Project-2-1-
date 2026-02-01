@@ -312,8 +312,8 @@ function SubmitDeal() {
   // Define which fields are required for each step
   const stepFields: Record<number, (keyof FormData)[]> = {
     0: ["name", "email", "phone"],
-    1: ["propertyAddress", "zipCode", "propertyType"],
-    2: ["bedrooms", "baths", "halfBaths", "squareFootage", "lotSize", "lotSizeUnit", "yearBuilt", "parkingType"],
+    1: ["propertyAddress", "zipCode"],
+    2: ["bedrooms", "baths", "halfBaths", "squareFootage", "lotSize", "lotSizeUnit", "yearBuilt", "parkingType", "propertyType"],
     3: ["closingDate", "inspectionPeriodExpiration", "occupancy"],
     4: ["propertyCondition", "repairEstimateMin", "repairEstimateMax", "roofAge", "acType", "heatingSystemType", "heatingSystemAge", "foundationType", "foundationCondition"],
     5: ["arv", "estimatedRepairs", "contractPrice"],

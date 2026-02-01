@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Send } from "lucide-react";
+import { MapPin, Send, FileText } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -9,6 +9,7 @@ interface KanbanCardProps {
     name: string;
     propertyAddress: string;
     sentToTcAt: string | null;
+    sentJvAgreementAt: string | null;
   };
 }
 
@@ -52,15 +53,29 @@ export function KanbanCard({ deal }: KanbanCardProps) {
           <div className="space-y-2">
             {/* Title and Badge Row */}
             <div className="flex items-start gap-2">
-              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 flex-1 min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 flex-1 min-w-0 mr-1">
                 {deal.name}
               </h3>
-              {deal.sentToTcAt && (
-                <div className="flex-shrink-0 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 px-1.5 py-0.5 rounded-md flex items-center gap-1" title={`Sent to TC on ${new Date(deal.sentToTcAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}`}>
-                  <Send className="w-2.5 h-2.5 text-green-700" />
-                  <span className="text-[9px] font-bold text-green-800 uppercase tracking-wide">TC</span>
-                </div>
-              )}
+              <div className="flex flex-wrap gap-1 justify-end max-w-[50%]">
+                {deal.sentToTcAt && (
+                  <div className="flex-shrink-0 bg-white border border-green-200 px-1 py-0.5 rounded flex items-center gap-0.5 shadow-sm" title={`Sent to TC on ${new Date(deal.sentToTcAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}`}>
+                    <Send className="w-2 h-2 text-green-600" />
+                    <span className="text-[8px] font-bold text-green-700 uppercase tracking-wide leading-none">TC</span>
+                  </div>
+                )}
+                {deal.sentJvAgreementAt && (
+                  <div className="flex-shrink-0 bg-white border border-blue-200 px-1 py-0.5 rounded flex items-center gap-0.5 shadow-sm" title={`JV Sent on ${new Date(deal.sentJvAgreementAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}`}>
+                    <Send className="w-2 h-2 text-blue-600" />
+                    <span className="text-[8px] font-bold text-blue-700 uppercase tracking-wide leading-none">JV</span>
+                  </div>
+                )}
+                {(deal as any).sentDealDescriptionAt && (
+                  <div className="flex-shrink-0 bg-white border border-purple-200 px-1 py-0.5 rounded flex items-center gap-0.5 shadow-sm" title={`Deal Description Sent on ${new Date((deal as any).sentDealDescriptionAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}`}>
+                    <FileText className="w-2 h-2 text-purple-600" />
+                    <span className="text-[8px] font-bold text-purple-700 uppercase tracking-wide leading-none">DESC</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Address Row */}

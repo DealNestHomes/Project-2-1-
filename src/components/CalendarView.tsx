@@ -33,13 +33,13 @@ function formatDateKey(date: Date): string {
 
 function formatCurrency(value: string | null | undefined): string {
   if (!value) return "N/A";
-  
+
   // Remove any non-numeric characters except decimal point
   const numericValue = value.replace(/[^0-9.]/g, "");
   const number = parseFloat(numericValue);
-  
+
   if (isNaN(number)) return "N/A";
-  
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -50,15 +50,15 @@ function formatCurrency(value: string | null | undefined): string {
 
 export function CalendarView({ deals }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  
+
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
-  
+
   // Group deals by closing date
   // Dates are stored as UTC midnight, so we parse them as UTC to prevent timezone shifts
   const dealsByDate = useMemo(() => {
     const grouped: Record<string, typeof deals> = {};
-    
+
     deals.forEach((deal) => {
       if (deal.closingDate) {
         // Parse the ISO date string and format using UTC methods
@@ -69,21 +69,21 @@ export function CalendarView({ deals }: CalendarViewProps) {
         grouped[dateKey].push(deal);
       }
     });
-    
+
     return grouped;
   }, [deals]);
-  
+
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-  
+
   const previousMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
   };
-  
+
   const nextMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
   };
-  
+
   const today = new Date();
   const isToday = (day: number) => {
     return (
@@ -92,29 +92,29 @@ export function CalendarView({ deals }: CalendarViewProps) {
       today.getFullYear() === currentYear
     );
   };
-  
+
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  
+
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  
+
   // Generate calendar days array
   const calendarDays = useMemo(() => {
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(null);
     }
-    
+
     // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentYear, currentMonth, day);
       const dateKey = formatDateKey(date);
       const dealsOnDate = dealsByDate[dateKey] || [];
-      
+
       days.push({
         day,
         date,
@@ -123,10 +123,10 @@ export function CalendarView({ deals }: CalendarViewProps) {
         isToday: isToday(day),
       });
     }
-    
+
     return days;
   }, [currentYear, currentMonth, daysInMonth, firstDayOfMonth, dealsByDate]);
-  
+
   return (
     <div className="space-y-6 max-w-full overflow-x-hidden">
       {/* Calendar Header */}
@@ -158,7 +158,7 @@ export function CalendarView({ deals }: CalendarViewProps) {
             </button>
           </div>
         </div>
-        
+
         {/* Day names header */}
         <div className="grid grid-cols-7 gap-2 mb-2">
           {dayNames.map((dayName) => (
@@ -171,7 +171,7 @@ export function CalendarView({ deals }: CalendarViewProps) {
             </div>
           ))}
         </div>
-        
+
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1.5">
           {calendarDays.map((dayData, index) => (

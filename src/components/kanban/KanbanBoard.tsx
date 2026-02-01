@@ -90,7 +90,7 @@ export function KanbanBoard({ deals }: KanbanBoardProps) {
     if (pointerCollisions.length > 0) {
       return pointerCollisions;
     }
-    
+
     // Fallback to rectangle intersection for better drop zone coverage
     return rectIntersection(args);
   };
@@ -105,7 +105,7 @@ export function KanbanBoard({ deals }: KanbanBoardProps) {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { over } = event;
-    
+
     if (!over) {
       setActiveColumn(null);
       return;
@@ -114,7 +114,7 @@ export function KanbanBoard({ deals }: KanbanBoardProps) {
     // The over.id could be either a column status or a deal ID
     // If it's a number, it's a deal ID, so we need to find which column it belongs to
     const overId = over.id;
-    
+
     if (typeof overId === 'string') {
       // It's a column ID
       setActiveColumn(overId);

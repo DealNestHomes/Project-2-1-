@@ -55,8 +55,8 @@ export function KanbanColumn({ status, label, deals, isActive = false }: KanbanC
       <div
         ref={setNodeRef}
         className={`flex-1 bg-gray-50 rounded-b-xl border-2 border-t-0 ${colors.border} p-3 overflow-y-auto transition-all duration-200 ${
-          isActive || isOver 
-            ? "bg-primary-50 ring-2 ring-primary-400 ring-inset shadow-lg" 
+          isActive || isOver
+            ? "bg-primary-50 ring-2 ring-primary-400 ring-inset shadow-lg"
             : ""
         }`}
         style={{ minHeight: "600px", maxHeight: "calc(100vh - 250px)" }}

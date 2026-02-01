@@ -67,6 +67,8 @@ export const updateDealDetails = baseProcedure
       additionalInfo: z.string().optional().nullable(),
       propertyAccess: z.string().optional().nullable(),
       photoLink: z.string().optional().nullable(),
+      photosNeeded: z.boolean().optional(),
+      lockboxNeeded: z.boolean().optional(),
       // Status tracking
       status: z.string().optional(),
       staffNotes: z.string().optional(),
@@ -120,7 +122,7 @@ export const updateDealDetails = baseProcedure
       updateData.closingDate = input.closingDate ? parseUTCDate(input.closingDate) : null;
     }
     if (input.inspectionPeriodExpiration !== undefined) {
-      updateData.inspectionPeriodExpiration = input.inspectionPeriodExpiration 
+      updateData.inspectionPeriodExpiration = input.inspectionPeriodExpiration
         ? parseUTCDate(input.inspectionPeriodExpiration)
         : null;
     }
@@ -153,6 +155,8 @@ export const updateDealDetails = baseProcedure
     if (input.additionalInfo !== undefined) updateData.additionalInfo = input.additionalInfo;
     if (input.propertyAccess !== undefined) updateData.propertyAccess = input.propertyAccess;
     if (input.photoLink !== undefined) updateData.photoLink = input.photoLink;
+    if (input.photosNeeded !== undefined) updateData.photosNeeded = input.photosNeeded;
+    if (input.lockboxNeeded !== undefined) updateData.lockboxNeeded = input.lockboxNeeded;
 
     // Status tracking
     if (input.status !== undefined) updateData.status = input.status;

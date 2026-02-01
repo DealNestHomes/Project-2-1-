@@ -71,6 +71,8 @@ model DealSubmission {
   additionalInfo      String?
   propertyAccess      String?
   photoLink           String?
+  photosNeeded        Boolean  @default(false)
+  lockboxNeeded       Boolean  @default(false)
   purchaseAgreementKey String?
   jvAgreementKey      String?
   assignmentAgreementKey String?
@@ -79,6 +81,8 @@ model DealSubmission {
   status              String   @default("new") // new, contacted, closed, etc.
   staffNotes          String?  // Staff notes and communication history
 
-  // TC tracking
+  // TC/JV tracking
   sentToTcAt          DateTime?
+  sentJvAgreementAt   DateTime?
+  sentDealDescriptionAt DateTime?
 }

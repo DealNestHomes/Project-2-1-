@@ -9,17 +9,17 @@ type DealSubmissionData = {
   name: string;
   email: string;
   phone: string;
-  
+
   // Seller Information
   sellerName: string;
   sellerEmail: string;
   sellerPhone: string;
-  
+
   // Basic Property Information
   propertyAddress: string;
   zipCode: string;
   propertyType: string;
-  
+
   // Property Specifications
   bedrooms?: number;
   baths?: number;
@@ -28,13 +28,13 @@ type DealSubmissionData = {
   lotSize?: number;
   lotSizeUnit?: string;
   yearBuilt?: number;
-  
+
   // Deal Details
   closingDate: string;
   inspectionPeriodExpiration: string;
   occupancy?: string;
   propertyCondition?: string;
-  
+
   // Repair & System Details
   repairEstimateMin?: string;
   repairEstimateMax?: string;
@@ -45,16 +45,18 @@ type DealSubmissionData = {
   foundationType?: string;
   foundationCondition?: string;
   parkingType?: string;
-  
+
   // Financial Details
   arv: string;
   estimatedRepairs: string;
   contractPrice: string;
-  
+
   // Additional Information
   additionalInfo?: string;
   propertyAccess?: string;
   photoLink?: string;
+  photosNeeded?: boolean;
+  lockboxNeeded?: boolean;
   purchaseAgreementKey?: string;
 };
 
@@ -67,10 +69,14 @@ type TcEmailData = {
   purchaseAgreementKey?: string;
   jvAgreementKey?: string;
   assignmentAgreementKey?: string;
+  photographyLink?: string;
   // Assignment/Buyer Information
   buyerName?: string;
   buyerPhone?: string;
   buyerEmail?: string;
+  // Deal Requirements
+  photosNeeded?: boolean;
+  lockboxNeeded?: boolean;
 };
 
 function formatValue(value: unknown): string {
@@ -127,10 +133,10 @@ function formatBedsAndBaths(bedrooms: number | undefined, baths: number | undefi
   const beds = bedrooms ?? 0;
   const fullBaths = baths ?? 0;
   const half = halfBaths ?? 0;
-  
+
   // Format as "X / Y" or "X / Y.5" if there are half baths
   const bathsDisplay = half > 0 ? `${fullBaths}.${half}` : `${fullBaths}`;
-  
+
   return `${beds} / ${bathsDisplay}`;
 }
 
@@ -253,13 +259,15 @@ function formatDealSubmissionEmail(data: DealSubmissionData): string {
         { label: "Additional Notes", value: data.additionalInfo },
         { label: "Property Access Instructions", value: data.propertyAccess },
         { label: "Photo Link", value: data.photoLink },
+        { label: "Photos needed?", value: data.photosNeeded ? "Yes" : "No" },
+        { label: "Lockbox needed?", value: data.lockboxNeeded ? "Yes" : "No" },
         { label: "Purchase Agreement", value: data.purchaseAgreementKey ? `${minioBaseUrl}/purchase-agreements/${data.purchaseAgreementKey}` : undefined },
       ],
     },
   ];
 
   let emailBody = "";
-  
+
   // Header
   emailBody += "\n";
   emailBody += "═".repeat(80) + "\n";
@@ -277,11 +285,11 @@ function formatDealSubmissionEmail(data: DealSubmissionData): string {
     emailBody += `│ ${section.title.padEnd(76, " ")} │\n`;
     emailBody += "└" + "─".repeat(78) + "┘\n";
     emailBody += "\n";
-    
+
     for (const field of section.fields) {
       emailBody += formatField(field.label, field.value) + "\n";
     }
-    
+
     emailBody += "\n\n";
   }
 
@@ -298,7 +306,7 @@ function formatDealSubmissionEmail(data: DealSubmissionData): string {
 
 function formatTcEmail(data: TcEmailData): string {
   let emailBody = "";
-  
+
   // Header
   emailBody += "\n";
   emailBody += "═".repeat(80) + "\n";
@@ -328,6 +336,18 @@ function formatTcEmail(data: TcEmailData): string {
   emailBody += `  Buyer Name                         ${data.buyerName || "Not provided"}\n`;
   emailBody += `  Buyer Phone                        ${data.buyerPhone || "Not provided"}\n`;
   emailBody += `  Buyer Email                        ${data.buyerEmail || "Not provided"}\n`;
+  emailBody += "\n\n";
+
+  // Deal Requirements Section
+  emailBody += "┌" + "─".repeat(78) + "┐\n";
+  emailBody += `│ DEAL REQUIREMENTS${" ".repeat(60)} │\n`;
+  emailBody += "└" + "─".repeat(78) + "┘\n";
+  emailBody += "\n";
+  emailBody += `  Photos Needed?                     ${data.photosNeeded ? "Yes" : "No"}\n`;
+  emailBody += `  Lockbox Needed?                    ${data.lockboxNeeded ? "Yes" : "No"}\n`;
+  if (data.photographyLink) {
+    emailBody += `  Photography Link                   ${data.photographyLink}\n`;
+  }
   emailBody += "\n\n";
 
   // Purchase Agreement Section
@@ -383,10 +403,10 @@ function formatTcEmail(data: TcEmailData): string {
 function generateDealSubmissionHtmlBody(data: DealSubmissionData): string {
   const baseUrl = getBaseUrl();
   const dealUrl = `${baseUrl}/staff/${data.submissionId}`;
-  
+
   // Calculate the spread
   const spread = calculateSpread(data.arv, data.estimatedRepairs, data.contractPrice);
-  
+
   const formatHtmlValue = (value: unknown): string => {
     if (value === "Unknown") {
       return '<span style="color: #6b7280;">Unknown</span>';
@@ -400,10 +420,10 @@ function generateDealSubmissionHtmlBody(data: DealSubmissionData): string {
   const renderSection = (title: string, fields: Array<{ label: string; value: unknown; isCurrency?: boolean }>) => {
     const rows = fields
       .map(({ label, value, isCurrency }) => {
-        const formattedValue = isCurrency && typeof value === "string" 
+        const formattedValue = isCurrency && typeof value === "string"
           ? formatCurrency(value)
           : formatHtmlValue(value);
-        
+
         return `
           <tr>
             <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151; width: 200px;">
@@ -496,6 +516,13 @@ function generateDealSubmissionHtmlBody(data: DealSubmissionData): string {
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
       <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <!-- Logo Area -->
+        <div style="padding: 24px; text-align: center; background-color: white;">
+          <a href="${baseUrl}" style="text-decoration: none;" target="_blank">
+            <img src="${baseUrl}/dealnest-website-design.png" alt="DealNest" style="height: 60px; width: auto; max-width: 100%;" />
+          </a>
+        </div>
+
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 32px 24px; border-radius: 8px 8px 0 0; text-align: center;">
           <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700;">
@@ -519,7 +546,7 @@ function generateDealSubmissionHtmlBody(data: DealSubmissionData): string {
         <!-- Content -->
         <div style="background-color: white; padding: 24px; border-radius: 0 0 8px 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
           ${sectionsHtml}
-          
+
           <!-- Footer -->
           <div style="margin-top: 32px; padding-top: 24px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px;">
             <p style="margin: 0;">
@@ -697,6 +724,8 @@ function generateStaffNotificationHtmlBody(data: DealSubmissionData): string {
         { label: "Additional Notes", value: data.additionalInfo },
         { label: "Property Access Instructions", value: data.propertyAccess },
         { label: "Photo Link", value: data.photoLink },
+        { label: "Photos needed?", value: data.photosNeeded ? '<b>Yes</b>' : 'No' },
+        { label: "Lockbox needed?", value: data.lockboxNeeded ? '<b>Yes</b>' : 'No' },
         { label: "Purchase Agreement", value: data.purchaseAgreementKey ? `<a href="${minioBaseUrl}/purchase-agreements/${data.purchaseAgreementKey}" style="color: #3b82f6; text-decoration: none; font-weight: 600;" target="_blank" rel="noopener noreferrer">View Purchase Agreement (PDF)</a>` : undefined },
       ],
     },
@@ -725,21 +754,23 @@ function generateStaffNotificationHtmlBody(data: DealSubmissionData): string {
           <td style="padding: 40px 20px;">
             <!-- Main container -->
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);">
-              
+
               <!-- Logo Header -->
               <tr>
-                <td style="padding: 48px 40px 40px 40px; text-align: center; background-color: #ffffff;">
-                  <img src="${logoUrl}" alt="DealNest" style="width: 220px; height: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                <td style="padding: 40px 40px 30px 40px; text-align: center; background-color: #ffffff;">
+                  <a href="${baseUrl}" style="text-decoration: none;" target="_blank">
+                    <img src="${logoUrl}" alt="DealNest" style="height: 80px; width: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                  </a>
                 </td>
               </tr>
 
               <!-- Header Banner -->
               <tr>
                 <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 36px 40px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                  <h1 style="margin: 0 0 12px 0; color: #ffffff; font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;">
+                  <h1 style="margin: 0 0 10px 0; color: #ffffff; font-size: 28px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;">
                     New Deal Submission
                   </h1>
-                  <p style="margin: 0; color: #dbeafe; font-size: 18px; line-height: 1.4; font-weight: 500;">
+                  <p style="margin: 0; color: #ffffff; font-size: 28px; line-height: 1.4; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                     ${data.propertyAddress}
                   </p>
                 </td>
@@ -817,21 +848,23 @@ function generateTcEmailHtmlBody(data: TcEmailData): string {
           <td style="padding: 40px 20px;">
             <!-- Main container -->
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);">
-              
+
               <!-- Logo Header -->
               <tr>
-                <td style="padding: 48px 40px 40px 40px; text-align: center; background-color: #ffffff;">
-                  <img src="${logoUrl}" alt="DealNest" style="width: 220px; height: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                <td style="padding: 40px 40px 30px 40px; text-align: center; background-color: #ffffff;">
+                  <a href="${baseUrl}" style="text-decoration: none;" target="_blank">
+                    <img src="${logoUrl}" alt="DealNest" style="height: 80px; width: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                  </a>
                 </td>
               </tr>
 
               <!-- Header Banner -->
               <tr>
                 <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 36px 40px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                  <h1 style="margin: 0 0 12px 0; color: #ffffff; font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;">
+                  <h1 style="margin: 0 0 10px 0; color: #ffffff; font-size: 28px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;">
                     Deal Information for TC
                   </h1>
-                  <p style="margin: 0; color: #dbeafe; font-size: 18px; line-height: 1.4; font-weight: 500;">
+                  <p style="margin: 0; color: #ffffff; font-size: 28px; line-height: 1.4; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                     ${data.propertyAddress}
                   </p>
                 </td>
@@ -840,7 +873,7 @@ function generateTcEmailHtmlBody(data: TcEmailData): string {
               <!-- Main Content -->
               <tr>
                 <td style="padding: 40px 40px 32px 40px; background-color: #fafafa;">
-                  
+
                   <!-- Seller Information Section -->
                   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 20px; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
                     <tr>
@@ -918,6 +951,49 @@ function generateTcEmailHtmlBody(data: TcEmailData): string {
                               ${formatHtmlValue(data.buyerEmail)}
                             </td>
                           </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Deal Requirements Section -->
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 20px; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+                    <tr>
+                      <td style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); padding: 16px 20px;">
+                        <h2 style="margin: 0; font-size: 14px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
+                          DEAL REQUIREMENTS
+                        </h2>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 0;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+                          <tr>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; font-weight: 600; color: #374151; vertical-align: top; width: 45%; font-size: 14px;">
+                              Photos Needed?
+                            </td>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; color: #1f2937; vertical-align: top; word-break: break-word; font-size: 14px; line-height: 1.6;">
+                              ${data.photosNeeded ? '<b style="color: #4338ca;">Yes</b>' : 'No'}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; font-weight: 600; color: #374151; vertical-align: top; width: 45%; font-size: 14px;">
+                              Lockbox Needed?
+                            </td>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; color: #1f2937; vertical-align: top; word-break: break-word; font-size: 14px; line-height: 1.6;">
+                              ${data.lockboxNeeded ? '<b style="color: #4338ca;">Yes</b>' : 'No'}
+                            </td>
+                          </tr>
+                          ${data.photographyLink ? `
+                          <tr>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; font-weight: 600; color: #374151; vertical-align: top; width: 45%; font-size: 14px;">
+                              Photography Link
+                            </td>
+                            <td style="padding: 14px 20px; border-bottom: 1px solid #f3f4f6; color: #3b82f6; vertical-align: top; word-break: break-word; font-size: 14px; line-height: 1.6;">
+                              <a href="${data.photographyLink}" style="color: #3b82f6; text-decoration: none; font-weight: 600;" target="_blank" rel="noopener noreferrer">View Photos</a>
+                            </td>
+                          </tr>
+                          ` : ''}
                         </table>
                       </td>
                     </tr>
@@ -1055,7 +1131,7 @@ function formatSubmitterConfirmationEmail(data: DealSubmissionData): string {
 function generateSubmitterConfirmationHtmlBody(data: DealSubmissionData): string {
   const baseUrl = getBaseUrl();
   const logoUrl = `${baseUrl}/dealnest-website-design.png`;
-  
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -1077,11 +1153,13 @@ function generateSubmitterConfirmationHtmlBody(data: DealSubmissionData): string
           <td style="padding: 40px 20px;">
             <!-- Main container -->
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 640px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);">
-              
+
               <!-- Logo Header -->
               <tr>
-                <td style="padding: 48px 40px 40px 40px; text-align: center; background-color: #ffffff;">
-                  <img src="${logoUrl}" alt="DealNest" style="width: 240px; height: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                <td style="padding: 40px 40px 30px 40px; text-align: center; background-color: #ffffff;">
+                  <a href="${baseUrl}" style="text-decoration: none;" target="_blank">
+                    <img src="${logoUrl}" alt="DealNest" style="height: 80px; width: auto; max-width: 100%; display: block; margin: 0 auto;" />
+                  </a>
                 </td>
               </tr>
 
@@ -1109,7 +1187,7 @@ function generateSubmitterConfirmationHtmlBody(data: DealSubmissionData): string
                   <p style="margin: 0 0 28px 0; color: #1f2937; font-size: 17px; line-height: 1.6; font-weight: 600;">
                     ${data.name}
                   </p>
-                  
+
                   <p style="margin: 0 0 36px 0; color: #374151; font-size: 16px; line-height: 1.7;">
                     We've successfully received your deal submission and our team is excited to review it. Here's a summary of what you submitted:
                   </p>
@@ -1219,7 +1297,7 @@ function generateSubmitterConfirmationHtmlBody(data: DealSubmissionData): string
                   <p style="margin: 0 0 12px 0; color: #374151; font-size: 16px; line-height: 1.7;">
                     We appreciate your business and look forward to working with you!
                   </p>
-                  
+
                   <p style="margin: 0; color: #374151; font-size: 16px; line-height: 1.7;">
                     <strong style="color: #1f2937; font-weight: 700;">Best regards,</strong><br>
                     <span style="color: #3b82f6; font-weight: 700; font-size: 17px;">The DealNest Team</span>

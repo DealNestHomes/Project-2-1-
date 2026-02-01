@@ -63,12 +63,12 @@ function FieldItem({ label, children }: { label: string; children: React.ReactNo
 
 // Component for rendering prominent financial fields
 function FinancialFieldItem({ label, value, colorScheme = "default" }: { label: string; value: string; colorScheme?: "default" | "primary" | "accent" }) {
-  const bgClass = colorScheme === "primary" 
+  const bgClass = colorScheme === "primary"
     ? "bg-gradient-to-br from-primary-50 to-primary-100/50 border-primary-300"
     : colorScheme === "accent"
     ? "bg-gradient-to-br from-accent-50 to-accent-100/50 border-accent-300"
     : "bg-gradient-to-br from-gray-50 to-gray-100/50 border-gray-300";
-  
+
   const textClass = colorScheme === "primary"
     ? "text-primary-700"
     : colorScheme === "accent"
@@ -89,7 +89,7 @@ function FinancialFieldItem({ label, value, colorScheme = "default" }: { label: 
 
 export function ReviewSummaryStep({ watch }: ReviewSummaryStepProps) {
   const formData = watch();
-  
+
   const trpc = useTRPC();
   const minioBaseUrlQuery = useQuery(trpc.getMinioBaseUrl.queryOptions());
   const minioBaseUrl = minioBaseUrlQuery.data?.baseUrl;
@@ -165,8 +165,8 @@ export function ReviewSummaryStep({ watch }: ReviewSummaryStepProps) {
             <FieldItem label="Square Footage">
               {formData.squareFootage && formData.squareFootage !== "Unknown" ? (
                 <span className="text-gray-900 font-semibold text-lg">
-                  {typeof formData.squareFootage === 'number' 
-                    ? formData.squareFootage.toLocaleString() 
+                  {typeof formData.squareFootage === 'number'
+                    ? formData.squareFootage.toLocaleString()
                     : formData.squareFootage}
                   <span className="text-sm text-gray-600 font-normal ml-1">sq ft</span>
                 </span>
@@ -268,18 +268,18 @@ export function ReviewSummaryStep({ watch }: ReviewSummaryStepProps) {
             <h3 className="text-lg font-bold text-gray-900">Financial Details</h3>
           </div>
           <dl className="grid md:grid-cols-3 gap-4">
-            <FinancialFieldItem 
-              label="ARV (After Repair Value)" 
+            <FinancialFieldItem
+              label="ARV (After Repair Value)"
               value={formatCurrency(formData.arv)}
               colorScheme="primary"
             />
-            <FinancialFieldItem 
-              label="Estimated Repairs" 
+            <FinancialFieldItem
+              label="Estimated Repairs"
               value={formatCurrency(formData.estimatedRepairs)}
               colorScheme="accent"
             />
-            <FinancialFieldItem 
-              label="Contract Price" 
+            <FinancialFieldItem
+              label="Contract Price"
               value={formatCurrency(formData.contractPrice)}
               colorScheme="primary"
             />
@@ -341,6 +341,16 @@ export function ReviewSummaryStep({ watch }: ReviewSummaryStepProps) {
               ) : (
                 <span className="text-gray-400 italic">Not provided</span>
               )}
+            </FieldItem>
+            <FieldItem label="Photos Needed?">
+              <span className={`font-bold ${formData.photosNeeded ? "text-primary-600" : "text-gray-600"}`}>
+                {formData.photosNeeded ? "Yes" : "No"}
+              </span>
+            </FieldItem>
+            <FieldItem label="Lockbox Needed?">
+              <span className={`font-bold ${formData.lockboxNeeded ? "text-primary-600" : "text-gray-600"}`}>
+                {formData.lockboxNeeded ? "Yes" : "No"}
+              </span>
             </FieldItem>
             <FieldItem label="Purchase Agreement">
               {formData.purchaseAgreementKey && minioBaseUrl ? (

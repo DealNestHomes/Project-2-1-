@@ -21,6 +21,37 @@ export function PropertyDetailsStep({
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
         <div>
           <label
+            htmlFor="propertyType"
+            className="block text-sm font-bold text-gray-800 mb-2.5"
+          >
+            Property Type <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="propertyType"
+            {...register("propertyType")}
+            className="w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-100 text-black transition-all hover:border-gray-300 hover:shadow-md px-4 py-3.5 text-base min-h-[52px] touch-manipulation bg-white cursor-pointer"
+          >
+            <option value="">Select Property Type</option>
+            <option value="Single Family">Single Family</option>
+            <option value="Multi-Family">Multi-Family</option>
+            <option value="Condo">Condo</option>
+            <option value="Townhouse">Townhouse</option>
+            <option value="Land">Land</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Mobile Home">Mobile Home</option>
+            <option value="Other">Other</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+          {errors.propertyType && (
+            <p className="mt-2.5 text-sm text-red-600 flex items-center gap-1.5 font-medium animate-in slide-in-from-top-1 duration-200">
+              <span className="flex-shrink-0 w-1.5 h-1.5 bg-red-600 rounded-full" />
+              {errors.propertyType.message as string}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
             htmlFor="bedrooms"
             className="block text-sm font-bold text-gray-800 mb-2.5"
           >
