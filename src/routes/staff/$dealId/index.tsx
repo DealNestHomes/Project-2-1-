@@ -1186,6 +1186,40 @@ function DealDetailPage() {
                     )}
                   </p>
                 </div>
+                <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Photos Needed?
+                  </label>
+                  <p className="text-gray-900 mt-2 text-base font-medium">
+                    {deal.photosNeeded ? (
+                      <span className="inline-flex items-center gap-2 text-green-700 font-semibold bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 text-gray-600 font-semibold bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
+                        No
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Lockbox Needed?
+                  </label>
+                  <p className="text-gray-900 mt-2 text-base font-medium">
+                    {deal.lockboxNeeded ? (
+                      <span className="inline-flex items-center gap-2 text-green-700 font-semibold bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 text-gray-600 font-semibold bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
+                        No
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
             ) : (
               <AdditionalInfoEditForm
