@@ -84,5 +84,4 @@ model DealSubmission {
   // TC/JV tracking
   sentToTcAt          DateTime?
   sentJvAgreementAt   DateTime?
-  sentDealDescriptionAt DateTime?
 }
