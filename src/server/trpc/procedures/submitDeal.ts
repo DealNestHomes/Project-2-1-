@@ -89,101 +89,106 @@ export const submitDeal = baseProcedure
     })
   )
   .mutation(async ({ input }) => {
-    // Helper function to parse YYYY-MM-DD string as UTC midnight
-    // This ensures consistent date storage in the database
-    const parseUTCDate = (dateString: string): Date => {
-      const parts = dateString.split("-");
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-      const day = parseInt(parts[2], 10);
-      return new Date(Date.UTC(year, month, day));
-    };
+    try {
+      // Helper function to parse YYYY-MM-DD string as UTC midnight
+      // This ensures consistent date storage in the database
+      const parseUTCDate = (dateString: string): Date => {
+        const parts = dateString.split("-");
+        const year = parseInt(parts[0] || "0", 10);
+        const month = parseInt(parts[1] || "1", 10) - 1; // Month is 0-indexed
+        const day = parseInt(parts[2] || "1", 10);
+        return new Date(Date.UTC(year, month, day));
+      };
 
-    // Helper function to convert "Unknown" to undefined for database storage
-    const unknownToUndefined = <T,>(value: T | "Unknown"): T | undefined => {
-      return value === "Unknown" ? undefined : value;
-    };
+      // Helper function to convert "Unknown" to undefined for database storage
+      const unknownToUndefined = <T,>(value: T | "Unknown"): T | undefined => {
+        return value === "Unknown" ? undefined : value;
+      };
 
-    // Helper function to convert "Unknown" dates to undefined
-    const unknownDateToUndefined = (value: string | "Unknown"): Date | undefined => {
-      return value === "Unknown" ? undefined : parseUTCDate(value);
-    };
+      // Helper function to convert "Unknown" dates to undefined
+      const unknownDateToUndefined = (value: string | "Unknown"): Date | undefined => {
+        return value === "Unknown" ? undefined : parseUTCDate(value);
+      };
 
-    const dealSubmission = await db.dealSubmission.create({
-      data: {
-        // Contact Information
-        name: input.name,
-        email: input.email,
-        phone: input.phone,
+      const dealSubmission = await db.dealSubmission.create({
+        data: {
+          // Contact Information
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
 
-        // Seller Information
-        sellerName: input.sellerName,
-        sellerEmail: input.sellerEmail,
-        sellerPhone: input.sellerPhone,
+          // Seller Information
+          sellerName: input.sellerName,
+          sellerEmail: input.sellerEmail,
+          sellerPhone: input.sellerPhone,
 
-        // Basic Property Information
-        propertyAddress: input.propertyAddress,
-        zipCode: input.zipCode,
-        propertyType: unknownToUndefined(input.propertyType) || "Unknown",
+          // Basic Property Information
+          propertyAddress: input.propertyAddress,
+          zipCode: input.zipCode,
+          propertyType: unknownToUndefined(input.propertyType) || "Unknown",
 
-        // Property Specifications
-        bedrooms: unknownToUndefined(input.bedrooms),
-        baths: unknownToUndefined(input.baths),
-        halfBaths: unknownToUndefined(input.halfBaths),
-        squareFootage: unknownToUndefined(input.squareFootage),
-        lotSize: unknownToUndefined(input.lotSize),
-        lotSizeUnit: unknownToUndefined(input.lotSizeUnit),
-        yearBuilt: unknownToUndefined(input.yearBuilt),
+          // Property Specifications
+          bedrooms: unknownToUndefined(input.bedrooms),
+          baths: unknownToUndefined(input.baths),
+          halfBaths: unknownToUndefined(input.halfBaths),
+          squareFootage: unknownToUndefined(input.squareFootage),
+          lotSize: unknownToUndefined(input.lotSize),
+          lotSizeUnit: unknownToUndefined(input.lotSizeUnit),
+          yearBuilt: unknownToUndefined(input.yearBuilt),
 
-        // Deal Details
-        closingDate: parseUTCDate(input.closingDate),
-        inspectionPeriodExpiration: unknownDateToUndefined(input.inspectionPeriodExpiration),
-        occupancy: unknownToUndefined(input.occupancy),
-        propertyCondition: unknownToUndefined(input.propertyCondition),
+          // Deal Details
+          closingDate: parseUTCDate(input.closingDate),
+          inspectionPeriodExpiration: unknownDateToUndefined(input.inspectionPeriodExpiration),
+          occupancy: unknownToUndefined(input.occupancy),
+          propertyCondition: unknownToUndefined(input.propertyCondition),
 
-        // Repair & System Details
-        repairEstimateMin: unknownToUndefined(input.repairEstimateMin),
-        repairEstimateMax: unknownToUndefined(input.repairEstimateMax),
-        roofAge: unknownToUndefined(input.roofAge),
-        acType: unknownToUndefined(input.acType),
-        heatingSystemType: unknownToUndefined(input.heatingSystemType),
-        heatingSystemAge: unknownToUndefined(input.heatingSystemAge),
-        foundationType: unknownToUndefined(input.foundationType),
-        foundationCondition: unknownToUndefined(input.foundationCondition),
-        parkingType: unknownToUndefined(input.parkingType),
+          // Repair & System Details
+          repairEstimateMin: unknownToUndefined(input.repairEstimateMin),
+          repairEstimateMax: unknownToUndefined(input.repairEstimateMax),
+          roofAge: unknownToUndefined(input.roofAge),
+          acType: unknownToUndefined(input.acType),
+          heatingSystemType: unknownToUndefined(input.heatingSystemType),
+          heatingSystemAge: unknownToUndefined(input.heatingSystemAge),
+          foundationType: unknownToUndefined(input.foundationType),
+          foundationCondition: unknownToUndefined(input.foundationCondition),
+          parkingType: unknownToUndefined(input.parkingType),
 
-        // Financial Details
-        arv: input.arv,
-        estimatedRepairs: input.estimatedRepairs,
-        contractPrice: input.contractPrice,
+          // Financial Details
+          arv: input.arv,
+          estimatedRepairs: input.estimatedRepairs,
+          contractPrice: input.contractPrice,
 
-        // Additional Information
-        additionalInfo: unknownToUndefined(input.additionalInfo),
-        propertyAccess: unknownToUndefined(input.propertyAccess),
-        photoLink: unknownToUndefined(input.photoLink),
-        photosNeeded: input.photosNeeded,
-        lockboxNeeded: input.lockboxNeeded,
-        purchaseAgreementKey: input.purchaseAgreementKey,
+          // Additional Information
+          additionalInfo: unknownToUndefined(input.additionalInfo),
+          propertyAccess: unknownToUndefined(input.propertyAccess),
+          photoLink: unknownToUndefined(input.photoLink),
+          photosNeeded: input.photosNeeded,
+          lockboxNeeded: input.lockboxNeeded,
+          purchaseAgreementKey: input.purchaseAgreementKey,
 
-        status: "new",
-      },
-    });
+          status: "new",
+        },
+      });
 
-    // Send real-time email notification immediately after successful submission
-    // This fires synchronously to ensure 100% delivery with no delays for Zapier integration
-    await sendDealSubmissionNotification({
-      ...input,
-      submissionId: dealSubmission.id,
-    });
+      // Send real-time email notification immediately after successful submission
+      // This fires synchronously to ensure 100% delivery with no delays for Zapier integration
+      await sendDealSubmissionNotification({
+        ...input,
+        submissionId: dealSubmission.id,
+      });
 
-    // Send confirmation email to the submitter
-    await sendSubmitterConfirmationEmail({
-      ...input,
-      submissionId: dealSubmission.id,
-    });
+      // Send confirmation email to the submitter
+      await sendSubmitterConfirmationEmail({
+        ...input,
+        submissionId: dealSubmission.id,
+      });
 
-    return {
-      success: true,
-      submissionId: dealSubmission.id,
-    };
+      return {
+        success: true,
+        submissionId: dealSubmission.id,
+      };
+    } catch (error) {
+      console.error("ERROR in submitDeal mutation:", error);
+      throw error;
+    }
   });

@@ -181,7 +181,7 @@ export function AdditionalInformationStep({
               <div className="relative flex items-center mt-1">
                 <input
                   type="checkbox"
-                  {...register("photosNeeded", { required: "This field is required" })}
+                  {...register("photosNeeded")}
                   className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
                 />
               </div>
@@ -207,7 +207,7 @@ export function AdditionalInformationStep({
               <div className="relative flex items-center mt-1">
                 <input
                   type="checkbox"
-                  {...register("lockboxNeeded", { required: "This field is required" })}
+                  {...register("lockboxNeeded")}
                   className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
                 />
               </div>

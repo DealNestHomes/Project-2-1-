@@ -18,33 +18,33 @@ type DealSubmissionData = {
   // Basic Property Information
   propertyAddress: string;
   zipCode: string;
-  propertyType: string;
+  propertyType: string | "Unknown";
 
   // Property Specifications
-  bedrooms?: number;
-  baths?: number;
-  halfBaths?: number;
-  squareFootage?: number;
-  lotSize?: number;
-  lotSizeUnit?: string;
-  yearBuilt?: number;
+  bedrooms?: number | "Unknown";
+  baths?: number | "Unknown";
+  halfBaths?: number | "Unknown";
+  squareFootage?: number | "Unknown";
+  lotSize?: number | "Unknown";
+  lotSizeUnit?: string | "Unknown";
+  yearBuilt?: number | "Unknown";
 
   // Deal Details
   closingDate: string;
-  inspectionPeriodExpiration: string;
-  occupancy?: string;
-  propertyCondition?: string;
+  inspectionPeriodExpiration: string | "Unknown";
+  occupancy?: string | "Unknown";
+  propertyCondition?: string | "Unknown";
 
   // Repair & System Details
-  repairEstimateMin?: string;
-  repairEstimateMax?: string;
-  roofAge?: string;
-  acType?: string;
-  heatingSystemType?: string;
-  heatingSystemAge?: string;
-  foundationType?: string;
-  foundationCondition?: string;
-  parkingType?: string;
+  repairEstimateMin?: string | "Unknown";
+  repairEstimateMax?: string | "Unknown";
+  roofAge?: string | "Unknown";
+  acType?: string | "Unknown";
+  heatingSystemType?: string | "Unknown";
+  heatingSystemAge?: string | "Unknown";
+  foundationType?: string | "Unknown";
+  foundationCondition?: string | "Unknown";
+  parkingType?: string | "Unknown";
 
   // Financial Details
   arv: string;
@@ -52,9 +52,9 @@ type DealSubmissionData = {
   contractPrice: string;
 
   // Additional Information
-  additionalInfo?: string;
-  propertyAccess?: string;
-  photoLink?: string;
+  additionalInfo?: string | "Unknown";
+  propertyAccess?: string | "Unknown";
+  photoLink?: string | "Unknown";
   photosNeeded?: boolean;
   lockboxNeeded?: boolean;
   purchaseAgreementKey?: string;
@@ -129,10 +129,12 @@ function calculateSpread(arv: string, repairs: string, contractPrice: string): s
   }
 }
 
-function formatBedsAndBaths(bedrooms: number | undefined, baths: number | undefined, halfBaths: number | undefined): string {
-  const beds = bedrooms ?? 0;
-  const fullBaths = baths ?? 0;
-  const half = halfBaths ?? 0;
+function formatBedsAndBaths(bedrooms: number | "Unknown" | undefined, baths: number | "Unknown" | undefined, halfBaths: number | "Unknown" | undefined): string {
+  if (bedrooms === "Unknown" && baths === "Unknown") return "Unknown";
+
+  const beds = bedrooms === "Unknown" ? "?" : (bedrooms ?? 0);
+  const fullBaths = baths === "Unknown" ? "?" : (baths ?? 0);
+  const half = halfBaths === "Unknown" ? 0 : (halfBaths ?? 0);
 
   // Format as "X / Y" or "X / Y.5" if there are half baths
   const bathsDisplay = half > 0 ? `${fullBaths}.${half}` : `${fullBaths}`;
@@ -168,14 +170,16 @@ function formatDealSubmissionEmail(data: DealSubmissionData): string {
   };
 
   // Helper function to format lot size
-  const formatLotSize = (size: number | undefined, unit: string | undefined): string => {
+  const formatLotSize = (size: number | "Unknown" | undefined, unit: string | "Unknown" | undefined): string => {
+    if (size === "Unknown") return "Unknown";
     if (!size) return "Not provided";
-    const unitStr = unit || "";
+    const unitStr = unit === "Unknown" ? "" : (unit || "");
     return `${size} ${unitStr}`.trim();
   };
 
   // Helper function to format square footage
-  const formatSquareFootage = (sqft: number | undefined): string => {
+  const formatSquareFootage = (sqft: number | "Unknown" | undefined): string => {
+    if (sqft === "Unknown") return "Unknown";
     if (!sqft) return "Not provided";
     return `${sqft.toLocaleString()} sq ft`;
   };
@@ -591,14 +595,16 @@ function generateStaffNotificationHtmlBody(data: DealSubmissionData): string {
   };
 
   // Helper function to format lot size
-  const formatLotSize = (size: number | undefined, unit: string | undefined): string => {
+  const formatLotSize = (size: number | "Unknown" | undefined, unit: string | "Unknown" | undefined): string => {
+    if (size === "Unknown") return "Unknown";
     if (!size) return "Not provided";
-    const unitStr = unit || "";
+    const unitStr = unit === "Unknown" ? "" : (unit || "");
     return `${size} ${unitStr}`.trim();
   };
 
   // Helper function to format square footage
-  const formatSquareFootage = (sqft: number | undefined): string => {
+  const formatSquareFootage = (sqft: number | "Unknown" | undefined): string => {
+    if (sqft === "Unknown") return "Unknown";
     if (!sqft) return "Not provided";
     return `${sqft.toLocaleString()} sq ft`;
   };
