@@ -231,6 +231,12 @@ const formSchema = z.object({
     z.literal("Unknown"),
     z.literal(""),
   ]),
+  photosNeeded: z.boolean({
+    required_error: "Please indicate if photos are needed",
+  }),
+  lockboxNeeded: z.boolean({
+    required_error: "Please indicate if a lockbox is needed",
+  }),
   purchaseAgreementKey: z.string().optional(),
 });
 
@@ -305,6 +311,8 @@ function SubmitDeal() {
       additionalInfo: "" as string | "Unknown",
       propertyAccess: "" as string | "Unknown",
       photoLink: "" as string | "Unknown" | "",
+      photosNeeded: false,
+      lockboxNeeded: false,
       purchaseAgreementKey: undefined as string | undefined,
     },
   });
@@ -318,7 +326,7 @@ function SubmitDeal() {
     4: ["propertyCondition", "repairEstimateMin", "repairEstimateMax", "roofAge", "acType", "heatingSystemType", "heatingSystemAge", "foundationType", "foundationCondition"],
     5: ["arv", "estimatedRepairs", "contractPrice"],
     6: ["sellerName", "sellerEmail", "sellerPhone"],
-    7: ["additionalInfo", "propertyAccess", "photoLink"],
+    7: ["additionalInfo", "propertyAccess", "photoLink", "photosNeeded", "lockboxNeeded"],
     8: [], // Review step - no validation needed
   };
 
